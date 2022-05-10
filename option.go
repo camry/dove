@@ -50,7 +50,7 @@ func Signals(signals ...os.Signal) Option {
     return func(o *option) { o.signals = signals }
 }
 
-// Logger with service logger.
+// Logger 配置日志记录器。
 func Logger(logger log.Logger) Option {
     return func(o *option) { o.logger = log.NewHelper(logger) }
 }
