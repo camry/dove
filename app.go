@@ -3,6 +3,7 @@ package dove
 import (
     "context"
     "errors"
+    "github.com/camry/dove/log"
     "os"
     "os/signal"
     "sync"
@@ -24,6 +25,7 @@ func New(opts ...Option) *App {
     o := &option{
         ctx:         context.Background(),
         signals:     []os.Signal{syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGTERM},
+        logger:      log.NewHelper(log.GetLogger()),
         stopTimeout: 10 * time.Second,
     }
     if id, err := uuid.NewUUID(); err != nil {
@@ -81,6 +83,7 @@ func (a *App) Run() error {
                 return ctx.Err()
             case <-c:
                 if err := a.Stop(); err != nil {
+                    a.opt.logger.Errorf("failed to stop app: %v", err)
                     return err
                 }
             }

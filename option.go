@@ -2,6 +2,7 @@ package dove
 
 import (
     "context"
+    "github.com/camry/dove/log"
     "github.com/camry/dove/network"
     "os"
     "time"
@@ -19,6 +20,7 @@ type option struct {
     ctx     context.Context
     signals []os.Signal
 
+    logger      *log.Helper
     stopTimeout time.Duration
     servers     []network.Server
 }
@@ -46,6 +48,11 @@ func Context(ctx context.Context) Option {
 // Signals 配置服务信号。
 func Signals(signals ...os.Signal) Option {
     return func(o *option) { o.signals = signals }
+}
+
+// Logger with service logger.
+func Logger(logger log.Logger) Option {
+    return func(o *option) { o.logger = log.NewHelper(logger) }
 }
 
 // StopTimeout 配置应用停止超时时间（单位：秒）。
