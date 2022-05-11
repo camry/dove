@@ -1,15 +1,18 @@
 package dove
 
 import (
+    "github.com/camry/dove/network/ghttp"
     "reflect"
     "testing"
     "time"
 )
 
 func TestNew(t *testing.T) {
+    hs := ghttp.NewServer()
     app := New(
         Name("dove"),
         Version("v1.0.0"),
+        Server(hs),
     )
     time.AfterFunc(time.Second, func() {
         _ = app.Stop()
