@@ -3,6 +3,7 @@ package ghttp
 import (
     "context"
     "github.com/camry/dove/log"
+    "github.com/labstack/echo-contrib/pprof"
     "github.com/labstack/echo/v4"
     "net"
 )
@@ -13,10 +14,11 @@ type ServerOption func(s *Server)
 // Server 定义 HTTP 服务包装器。
 type Server struct {
     *echo.Echo
-    addr     string
-    certFile any
-    keyFile  any
-    log      *log.Helper
+    addr        string
+    certFile    any
+    keyFile     any
+    enablePProf bool
+    log         *log.Helper
 }
 
 // Addr 配置服务地址。
@@ -32,6 +34,11 @@ func TlsFile(certFile, keyFile any) ServerOption {
     }
 }
 
+// EnablePProf 配置启用 PProf 性能分析工具。
+func EnablePProf() ServerOption {
+    return func(s *Server) { s.enablePProf = true }
+}
+
 // NewServer 新建 HTTP 服务器。
 func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
@@ -43,6 +50,9 @@ func NewServer(opts ...ServerOption) *Server {
     }
     for _, opt := range opts {
         opt(srv)
+    }
+    if srv.enablePProf {
+        pprof.Register(srv.Echo)
     }
     srv.HideBanner = true
     return srv
