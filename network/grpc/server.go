@@ -2,8 +2,10 @@ package grpc
 
 import (
     "context"
+    "crypto/tls"
     "github.com/camry/dove/log"
     "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials"
     "google.golang.org/grpc/health"
     "net"
 )
@@ -20,6 +22,11 @@ func Address(address string) ServerOption {
     return func(s *Server) { s.address = address }
 }
 
+// TLSConfig 配置 TLS。
+func TLSConfig(c *tls.Config) ServerOption {
+    return func(s *Server) { s.tlsConf = c }
+}
+
 // Logger 配置日志记录器。
 func Logger(logger log.Logger) ServerOption {
     return func(s *Server) { s.log = log.NewHelper(logger) }
@@ -29,6 +36,7 @@ type Server struct {
     *grpc.Server
     baseCtx            context.Context
     err                error
+    tlsConf            *tls.Config
     lis                net.Listener
     network            string
     address            string
@@ -54,6 +62,12 @@ func NewServer(opts ...ServerOption) *Server {
     grpcOpts := []grpc.ServerOption{
         grpc.ChainUnaryInterceptor(srv.unaryInterceptors...),
         grpc.ChainStreamInterceptor(srv.streamInterceptors...),
+    }
+    if srv.tlsConf != nil {
+        grpcOpts = append(grpcOpts, grpc.Creds(credentials.NewTLS(srv.tlsConf)))
+    }
+    if len(srv.grpcOpts) > 0 {
+        grpcOpts = append(grpcOpts, srv.grpcOpts...)
     }
     srv.Server = grpc.NewServer(grpcOpts...)
     srv.err = srv.listen()
