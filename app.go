@@ -28,7 +28,7 @@ func New(opts ...Option) *App {
         logger:      log.NewHelper(log.GetLogger()),
         stopTimeout: 10 * time.Second,
     }
-    if id, err := uuid.NewUUID(); err != nil {
+    if id, err := uuid.NewUUID(); err == nil {
         o.id = id.String()
     }
     for _, opt := range opts {
