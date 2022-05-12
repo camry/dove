@@ -14,16 +14,27 @@ type ServerOption func(s *Server)
 // Server 定义 HTTP 服务包装器。
 type Server struct {
     *echo.Echo
-    addr        string
+    log         *log.Helper
+    network     string
+    address     string
     certFile    any
     keyFile     any
     enablePProf bool
-    log         *log.Helper
 }
 
-// Addr 配置服务地址。
-func Addr(addr string) ServerOption {
-    return func(s *Server) { s.addr = addr }
+// Network 配置网络协议。
+func Network(network string) ServerOption {
+    return func(s *Server) { s.network = network }
+}
+
+// Address 配置服务地址。
+func Address(address string) ServerOption {
+    return func(s *Server) { s.address = address }
+}
+
+// Logger 配置日志记录器。
+func Logger(logger log.Logger) ServerOption {
+    return func(s *Server) { s.log = log.NewHelper(logger) }
 }
 
 // TlsFile 配置 HTTPS 服务证书文件。
@@ -43,7 +54,8 @@ func EnablePProf() ServerOption {
 func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
         Echo:     echo.New(),
-        addr:     ":0",
+        network:  "tcp",
+        address:  ":0",
         certFile: "",
         keyFile:  "",
         log:      log.NewHelper(log.GetLogger()),
@@ -54,6 +66,7 @@ func NewServer(opts ...ServerOption) *Server {
     if srv.enablePProf {
         pprof.Register(srv.Echo)
     }
+    srv.ListenerNetwork = srv.network
     srv.HideBanner = true
     return srv
 }
@@ -63,15 +76,15 @@ func (s *Server) Start(ctx context.Context) error {
     s.Echo.Server.BaseContext = func(net.Listener) context.Context {
         return ctx
     }
-    s.log.Info("HTTP server starting")
+    s.log.Info("[HTTP] server starting")
     if s.certFile != "" && s.keyFile != "" {
-        return s.Echo.StartTLS(s.addr, s.certFile, s.keyFile)
+        return s.Echo.StartTLS(s.address, s.certFile, s.keyFile)
     }
-    return s.Echo.Start(s.addr)
+    return s.Echo.Start(s.address)
 }
 
 // Stop 停止 HTTP 服务。
 func (s *Server) Stop(ctx context.Context) error {
-    s.log.Info("HTTP server stopping")
+    s.log.Info("[HTTP] server stopping")
     return s.Shutdown(ctx)
 }

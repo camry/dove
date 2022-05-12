@@ -2,6 +2,7 @@ package dove
 
 import (
     "github.com/camry/dove/network/ghttp"
+    "github.com/camry/dove/network/grpc"
     "reflect"
     "testing"
     "time"
@@ -9,14 +10,17 @@ import (
 
 func TestNew(t *testing.T) {
     hs := ghttp.NewServer(
-        ghttp.Addr(":8080"),
+        ghttp.Address(":8080"),
         ghttp.TlsFile("", ""),
         ghttp.EnablePProf(),
+    )
+    gs := grpc.NewServer(
+        grpc.Address(":8081"),
     )
     app := New(
         Name("dove"),
         Version("v1.0.0"),
-        Server(hs),
+        Server(hs, gs),
     )
     time.AfterFunc(time.Second, func() {
         _ = app.Stop()

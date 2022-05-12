@@ -1,0 +1,90 @@
+package grpc
+
+import (
+    "context"
+    "github.com/camry/dove/log"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/health"
+    "net"
+)
+
+type ServerOption func(s *Server)
+
+// Network 配置网络协议。
+func Network(network string) ServerOption {
+    return func(s *Server) { s.network = network }
+}
+
+// Address 配置服务地址。
+func Address(address string) ServerOption {
+    return func(s *Server) { s.address = address }
+}
+
+// Logger 配置日志记录器。
+func Logger(logger log.Logger) ServerOption {
+    return func(s *Server) { s.log = log.NewHelper(logger) }
+}
+
+type Server struct {
+    *grpc.Server
+    baseCtx            context.Context
+    err                error
+    lis                net.Listener
+    network            string
+    address            string
+    grpcOpts           []grpc.ServerOption
+    unaryInterceptors  []grpc.UnaryServerInterceptor
+    streamInterceptors []grpc.StreamServerInterceptor
+    health             *health.Server
+    log                *log.Helper
+}
+
+// NewServer 新建 gRPC 服务器。
+func NewServer(opts ...ServerOption) *Server {
+    srv := &Server{
+        baseCtx: context.Background(),
+        network: "tcp",
+        address: ":0",
+        health:  health.NewServer(),
+        log:     log.NewHelper(log.GetLogger()),
+    }
+    for _, o := range opts {
+        o(srv)
+    }
+    grpcOpts := []grpc.ServerOption{
+        grpc.ChainUnaryInterceptor(srv.unaryInterceptors...),
+        grpc.ChainStreamInterceptor(srv.streamInterceptors...),
+    }
+    srv.Server = grpc.NewServer(grpcOpts...)
+    srv.err = srv.listen()
+    return srv
+}
+
+// Start 启动 gRPC 服务器。
+func (s *Server) Start(ctx context.Context) error {
+    if s.err != nil {
+        return s.err
+    }
+    s.baseCtx = ctx
+    s.log.Infof("[gRPC] server listening on: %s", s.lis.Addr().String())
+    s.health.Resume()
+    return s.Serve(s.lis)
+}
+
+// Stop 停止 gRPC 服务器。
+func (s *Server) Stop(ctx context.Context) error {
+    s.health.Shutdown()
+    s.GracefulStop()
+    s.log.Info("[gRPC] server stopping")
+    return nil
+}
+
+// listen 网络监听。
+func (s *Server) listen() error {
+    lis, err := net.Listen(s.network, s.address)
+    if err != nil {
+        return err
+    }
+    s.lis = lis
+    return nil
+}
