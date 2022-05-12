@@ -7,17 +7,24 @@ import (
     "google.golang.org/grpc"
     "google.golang.org/grpc/credentials"
     "google.golang.org/grpc/health"
+    "google.golang.org/grpc/health/grpc_health_v1"
+    "google.golang.org/grpc/reflection"
     "net"
 )
 
 type ServerOption func(s *Server)
+
+// Logger 配置日志记录器。
+func Logger(logger log.Logger) ServerOption {
+    return func(s *Server) { s.log = log.NewHelper(logger) }
+}
 
 // Network 配置网络协议。
 func Network(network string) ServerOption {
     return func(s *Server) { s.network = network }
 }
 
-// Address 配置服务地址。
+// Address 配置服务监听地址。
 func Address(address string) ServerOption {
     return func(s *Server) { s.address = address }
 }
@@ -27,24 +34,19 @@ func TLSConfig(c *tls.Config) ServerOption {
     return func(s *Server) { s.tlsConf = c }
 }
 
-// Logger 配置日志记录器。
-func Logger(logger log.Logger) ServerOption {
-    return func(s *Server) { s.log = log.NewHelper(logger) }
-}
-
 type Server struct {
     *grpc.Server
     baseCtx            context.Context
+    log                *log.Helper
     err                error
-    tlsConf            *tls.Config
-    lis                net.Listener
     network            string
     address            string
+    tlsConf            *tls.Config
+    lis                net.Listener
     grpcOpts           []grpc.ServerOption
     unaryInterceptors  []grpc.UnaryServerInterceptor
     streamInterceptors []grpc.StreamServerInterceptor
     health             *health.Server
-    log                *log.Helper
 }
 
 // NewServer 新建 gRPC 服务器。
@@ -71,6 +73,9 @@ func NewServer(opts ...ServerOption) *Server {
     }
     srv.Server = grpc.NewServer(grpcOpts...)
     srv.err = srv.listen()
+    // 内部注册
+    grpc_health_v1.RegisterHealthServer(srv.Server, srv.health)
+    reflection.Register(srv.Server)
     return srv
 }
 

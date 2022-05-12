@@ -2,10 +2,11 @@ package ghttp
 
 import (
     "context"
+    "crypto/tls"
+    "errors"
     "github.com/camry/dove/log"
-    "github.com/labstack/echo-contrib/pprof"
-    "github.com/labstack/echo/v4"
     "net"
+    "net/http"
 )
 
 // ServerOption 定义一个 HTTP 服务选项类型。
@@ -13,23 +14,14 @@ type ServerOption func(s *Server)
 
 // Server 定义 HTTP 服务包装器。
 type Server struct {
-    *echo.Echo
-    log         *log.Helper
-    network     string
-    address     string
-    certFile    any
-    keyFile     any
-    enablePProf bool
-}
-
-// Network 配置网络协议。
-func Network(network string) ServerOption {
-    return func(s *Server) { s.network = network }
-}
-
-// Address 配置服务地址。
-func Address(address string) ServerOption {
-    return func(s *Server) { s.address = address }
+    *http.Server
+    log     *log.Helper
+    err     error
+    network string
+    address string
+    tlsConf *tls.Config
+    lis     net.Listener
+    handler http.Handler
 }
 
 // Logger 配置日志记录器。
@@ -37,54 +29,77 @@ func Logger(logger log.Logger) ServerOption {
     return func(s *Server) { s.log = log.NewHelper(logger) }
 }
 
-// TlsFile 配置 HTTPS 服务证书文件。
-func TlsFile(certFile, keyFile any) ServerOption {
-    return func(s *Server) {
-        s.certFile = certFile
-        s.keyFile = keyFile
-    }
+// Network 配置网络协议。
+func Network(network string) ServerOption {
+    return func(s *Server) { s.network = network }
 }
 
-// EnablePProf 配置启用 PProf 性能分析工具。
-func EnablePProf() ServerOption {
-    return func(s *Server) { s.enablePProf = true }
+// Address 配置服务监听地址。
+func Address(address string) ServerOption {
+    return func(s *Server) { s.address = address }
+}
+
+// TLSConfig 配置 TLS。
+func TLSConfig(c *tls.Config) ServerOption {
+    return func(s *Server) { s.tlsConf = c }
+}
+
+// Handler 配置处理器。
+func Handler(handler http.Handler) ServerOption {
+    return func(s *Server) { s.handler = handler }
 }
 
 // NewServer 新建 HTTP 服务器。
 func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
-        Echo:     echo.New(),
-        network:  "tcp",
-        address:  ":0",
-        certFile: "",
-        keyFile:  "",
-        log:      log.NewHelper(log.GetLogger()),
+        network: "tcp",
+        address: ":0",
+        log:     log.NewHelper(log.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)
     }
-    if srv.enablePProf {
-        pprof.Register(srv.Echo)
+    srv.Server = &http.Server{
+        Handler:   srv.handler,
+        TLSConfig: srv.tlsConf,
     }
-    srv.ListenerNetwork = srv.network
-    srv.HideBanner = true
+    srv.err = srv.listen()
     return srv
 }
 
 // Start 启动 HTTP 服务。
 func (s *Server) Start(ctx context.Context) error {
-    s.Echo.Server.BaseContext = func(net.Listener) context.Context {
+    if s.err != nil {
+        return s.err
+    }
+    s.BaseContext = func(net.Listener) context.Context {
         return ctx
     }
-    s.log.Info("[HTTP] server starting")
-    if s.certFile != "" && s.keyFile != "" {
-        return s.Echo.StartTLS(s.address, s.certFile, s.keyFile)
+    s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+    var err error
+    if s.tlsConf != nil {
+        err = s.ServeTLS(s.lis, "", "")
+    } else {
+        err = s.Serve(s.lis)
     }
-    return s.Echo.Start(s.address)
+    if !errors.Is(err, http.ErrServerClosed) {
+        return err
+    }
+    return nil
 }
 
 // Stop 停止 HTTP 服务。
 func (s *Server) Stop(ctx context.Context) error {
     s.log.Info("[HTTP] server stopping")
     return s.Shutdown(ctx)
+}
+
+// listen 网络监听。
+func (s *Server) listen() error {
+    lis, err := net.Listen(s.network, s.address)
+    if err != nil {
+        return err
+    }
+    s.lis = lis
+    return nil
 }

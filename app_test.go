@@ -9,14 +9,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
-    hs := ghttp.NewServer(
-        ghttp.Address(":8080"),
-        ghttp.TlsFile("", ""),
-        ghttp.EnablePProf(),
-    )
-    gs := grpc.NewServer(
-        grpc.Address(":8081"),
-    )
+    hs := ghttp.NewServer()
+    gs := grpc.NewServer()
     app := New(
         Name("dove"),
         Version("v1.0.0"),
