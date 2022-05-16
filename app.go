@@ -14,6 +14,14 @@ import (
     "golang.org/x/sync/errgroup"
 )
 
+// AppInfo 应用程序上下文值接口。
+type AppInfo interface {
+    ID() string
+    Name() string
+    Version() string
+}
+
+// App 应用程序组件生命周期管理器。
 type App struct {
     opt    *option
     ctx    context.Context
@@ -53,7 +61,7 @@ func (a *App) Version() string { return a.opt.version }
 
 // Run 执行应用程序生命周期中注册的所有服务。
 func (a *App) Run() error {
-    eg, ctx := errgroup.WithContext(a.ctx)
+    eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
     wg := sync.WaitGroup{}
     c := make(chan os.Signal, 1)
     signal.Notify(c, a.opt.signals...)
@@ -63,14 +71,14 @@ func (a *App) Run() error {
         srv := srv
         eg.Go(func() error {
             <-ctx.Done() // 等待停止信号
-            stopCtx, cancel := context.WithTimeout(a.opt.ctx, a.opt.stopTimeout)
+            stopCtx, cancel := context.WithTimeout(NewContext(a.opt.ctx, a), a.opt.stopTimeout)
             defer cancel()
             return srv.Stop(stopCtx)
         })
         wg.Add(1)
         eg.Go(func() error {
             wg.Done()
-            return srv.Start(a.opt.ctx)
+            return srv.Start(NewContext(a.opt.ctx, a))
         })
     }
     wg.Wait()
@@ -101,4 +109,17 @@ func (a *App) Stop() error {
         a.cancel()
     }
     return nil
+}
+
+type appKey struct{}
+
+// NewContext 返回一个带有值的新上下文。
+func NewContext(ctx context.Context, s AppInfo) context.Context {
+    return context.WithValue(ctx, appKey{}, s)
+}
+
+// FromContext 返回存储在 ctx 中的传输值（如果有）。
+func FromContext(ctx context.Context) (s AppInfo, ok bool) {
+    s, ok = ctx.Value(appKey{}).(AppInfo)
+    return
 }
