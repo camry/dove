@@ -34,6 +34,21 @@ func TLSConfig(c *tls.Config) ServerOption {
     return func(s *Server) { s.tlsConf = c }
 }
 
+// UnaryInterceptor 配置一元拦截器。
+func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
+    return func(s *Server) { s.unaryInterceptors = in }
+}
+
+// StreamInterceptor 配置流拦截器。
+func StreamInterceptor(in ...grpc.StreamServerInterceptor) ServerOption {
+    return func(s *Server) { s.streamInterceptors = in }
+}
+
+// GRPCOptions 配置 gRPC 选项。
+func GRPCOptions(opts ...grpc.ServerOption) ServerOption {
+    return func(s *Server) { s.grpcOpts = opts }
+}
+
 type Server struct {
     *grpc.Server
     baseCtx            context.Context
