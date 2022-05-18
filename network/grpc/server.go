@@ -98,8 +98,8 @@ func NewServer(opts ...ServerOption) *Server {
         streamInterceptors = append(streamInterceptors, srv.streamInterceptors...)
     }
     grpcOpts := []grpc.ServerOption{
-        grpc.ChainUnaryInterceptor(srv.unaryInterceptors...),
-        grpc.ChainStreamInterceptor(srv.streamInterceptors...),
+        grpc.ChainUnaryInterceptor(unaryInterceptors...),
+        grpc.ChainStreamInterceptor(streamInterceptors...),
     }
     if srv.tlsConf != nil {
         grpcOpts = append(grpcOpts, grpc.Creds(credentials.NewTLS(srv.tlsConf)))
