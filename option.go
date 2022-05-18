@@ -2,10 +2,11 @@ package dove
 
 import (
     "context"
-    "github.com/camry/dove/log"
-    "github.com/camry/dove/network"
     "os"
     "time"
+
+    "github.com/camry/dove/log"
+    "github.com/camry/dove/network"
 )
 
 // Option 定义一个应用程序选项类型。

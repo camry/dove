@@ -3,13 +3,15 @@ package grpc
 import (
     "context"
     "crypto/tls"
+    "net"
+    "time"
+
     "github.com/camry/dove/log"
     "google.golang.org/grpc"
     "google.golang.org/grpc/credentials"
     "google.golang.org/grpc/health"
     "google.golang.org/grpc/health/grpc_health_v1"
     "google.golang.org/grpc/reflection"
-    "net"
 )
 
 type ServerOption func(s *Server)
@@ -29,6 +31,11 @@ func Address(address string) ServerOption {
     return func(s *Server) { s.address = address }
 }
 
+// Timeout 配置服务超时时间（单位：秒）。
+func Timeout(timeout time.Duration) ServerOption {
+    return func(s *Server) { s.timeout = timeout }
+}
+
 // TLSConfig 配置 TLS。
 func TLSConfig(c *tls.Config) ServerOption {
     return func(s *Server) { s.tlsConf = c }
@@ -44,9 +51,9 @@ func StreamInterceptor(in ...grpc.StreamServerInterceptor) ServerOption {
     return func(s *Server) { s.streamInterceptors = in }
 }
 
-// GRPCOptions 配置 gRPC 选项。
-func GRPCOptions(opts ...grpc.ServerOption) ServerOption {
-    return func(s *Server) { s.grpcOpts = opts }
+// Options 配置 gRPC 选项。
+func Options(grpcOpts ...grpc.ServerOption) ServerOption {
+    return func(s *Server) { s.grpcOpts = grpcOpts }
 }
 
 type Server struct {
@@ -56,6 +63,7 @@ type Server struct {
     err                error
     network            string
     address            string
+    timeout            time.Duration
     tlsConf            *tls.Config
     lis                net.Listener
     grpcOpts           []grpc.ServerOption
@@ -70,11 +78,24 @@ func NewServer(opts ...ServerOption) *Server {
         baseCtx: context.Background(),
         network: "tcp",
         address: ":0",
+        timeout: 1 * time.Second,
         health:  health.NewServer(),
         log:     log.NewHelper(log.GetLogger()),
     }
     for _, o := range opts {
         o(srv)
+    }
+    unaryInterceptors := []grpc.UnaryServerInterceptor{
+        srv.defaultUnaryServerInterceptor(),
+    }
+    streamInterceptors := []grpc.StreamServerInterceptor{
+        srv.defaultStreamServerInterceptor(),
+    }
+    if len(srv.unaryInterceptors) > 0 {
+        unaryInterceptors = append(unaryInterceptors, srv.unaryInterceptors...)
+    }
+    if len(srv.streamInterceptors) > 0 {
+        streamInterceptors = append(streamInterceptors, srv.streamInterceptors...)
     }
     grpcOpts := []grpc.ServerOption{
         grpc.ChainUnaryInterceptor(srv.unaryInterceptors...),

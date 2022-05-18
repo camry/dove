@@ -1,11 +1,12 @@
 package dove
 
 import (
-    "github.com/camry/dove/network/ghttp"
-    "github.com/camry/dove/network/grpc"
     "reflect"
     "testing"
     "time"
+
+    "github.com/camry/dove/network/ghttp"
+    "github.com/camry/dove/network/grpc"
 )
 
 func TestNew(t *testing.T) {

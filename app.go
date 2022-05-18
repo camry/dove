@@ -3,13 +3,13 @@ package dove
 import (
     "context"
     "errors"
-    "github.com/camry/dove/log"
     "os"
     "os/signal"
     "sync"
     "syscall"
     "time"
 
+    "github.com/camry/dove/log"
     "github.com/google/uuid"
     "golang.org/x/sync/errgroup"
 )
@@ -114,12 +114,12 @@ func (a *App) Stop() error {
 type appKey struct{}
 
 // NewContext 返回一个带有值的新上下文。
-func NewContext(ctx context.Context, s AppInfo) context.Context {
-    return context.WithValue(ctx, appKey{}, s)
+func NewContext(ctx context.Context, a AppInfo) context.Context {
+    return context.WithValue(ctx, appKey{}, a)
 }
 
 // FromContext 返回存储在 ctx 中的传输值（如果有）。
-func FromContext(ctx context.Context) (s AppInfo, ok bool) {
-    s, ok = ctx.Value(appKey{}).(AppInfo)
+func FromContext(ctx context.Context) (a AppInfo, ok bool) {
+    a, ok = ctx.Value(appKey{}).(AppInfo)
     return
 }
