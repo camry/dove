@@ -66,7 +66,7 @@ func (a *App) Run() error {
     c := make(chan os.Signal, 1)
     signal.Notify(c, a.opt.signals...)
 
-    // 启动注册的网络服务器。
+    // 启动注册的服务器。
     for _, srv := range a.opt.servers {
         srv := srv
         eg.Go(func() error {

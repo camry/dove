@@ -5,8 +5,8 @@ import (
     "testing"
     "time"
 
-    "github.com/camry/dove/network/ghttp"
-    "github.com/camry/dove/network/grpc"
+    "github.com/camry/dove/server/ghttp"
+    "github.com/camry/dove/server/grpc"
 )
 
 func TestNew(t *testing.T) {

@@ -6,7 +6,7 @@ import (
     "time"
 
     "github.com/camry/dove/log"
-    "github.com/camry/dove/network"
+    "github.com/camry/dove/server"
 )
 
 // Option 定义一个应用程序选项类型。
@@ -23,7 +23,7 @@ type option struct {
 
     logger      *log.Helper
     stopTimeout time.Duration
-    servers     []network.Server
+    servers     []server.Server
 }
 
 // ID 配置服务ID。
@@ -61,7 +61,7 @@ func StopTimeout(t time.Duration) Option {
     return func(o *option) { o.stopTimeout = t }
 }
 
-// Server 配置网络服务器。
-func Server(srv ...network.Server) Option {
+// Server 配置服务器。
+func Server(srv ...server.Server) Option {
     return func(o *option) { o.servers = srv }
 }
