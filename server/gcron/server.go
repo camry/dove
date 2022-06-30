@@ -2,8 +2,9 @@ package gcron
 
 import (
     "context"
+
+    "github.com/camry/dove/cron"
     "github.com/camry/dove/log"
-    "github.com/robfig/cron/v3"
 )
 
 // ServerOption 定义一个 Cron 服务选项类型。
@@ -42,6 +43,6 @@ func (s *Server) Start(ctx context.Context) error {
 // Stop 停止 Cron 服务。
 func (s *Server) Stop(ctx context.Context) error {
     s.log.Info("[CRON] server stopping")
-    s.Cron.Stop()
+    s.Cron.Stop(ctx)
     return nil
 }
