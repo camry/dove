@@ -231,13 +231,13 @@ func (c *Cron) Run() {
 
 // run 调度程序.. 这是私有的，只是因为需要同步对“运行”状态变量的访问。
 func (c *Cron) run() {
-    c.logger.Info("start")
+    // c.logger.Info("start")
 
     // 计算出每个条目的下一个激活时间。
     now := c.now()
     for _, entry := range c.entries {
         entry.Next = entry.Schedule.Next(now)
-        c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "schedule", "now", now, "entry", entry.ID, "next", entry.Next)
+        // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "schedule", "now", now, "entry", entry.ID, "next", entry.Next)
     }
 
     for {
@@ -256,7 +256,7 @@ func (c *Cron) run() {
             select {
             case now = <-timer.C:
                 now = now.In(c.location)
-                c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "wake", "now", now)
+                // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "wake", "now", now)
 
                 // 运行下一次小于现在的每个条目
                 for _, e := range c.entries {
@@ -266,7 +266,7 @@ func (c *Cron) run() {
                     c.startJob(e.WrappedJob)
                     e.Prev = e.Next
                     e.Next = e.Schedule.Next(now)
-                    c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "run", "now", now, "entry", e.ID, "next", e.Next)
+                    // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "run", "now", now, "entry", e.ID, "next", e.Next)
                 }
 
             case newEntry := <-c.add:
@@ -274,7 +274,7 @@ func (c *Cron) run() {
                 now = c.now()
                 newEntry.Next = newEntry.Schedule.Next(now)
                 c.entries = append(c.entries, newEntry)
-                c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "added", "now", now, "entry", newEntry.ID, "next", newEntry.Next)
+                // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "added", "now", now, "entry", newEntry.ID, "next", newEntry.Next)
 
             case replyChan := <-c.snapshot:
                 replyChan <- c.entrySnapshot()
@@ -282,14 +282,14 @@ func (c *Cron) run() {
 
             case <-c.stop:
                 timer.Stop()
-                c.logger.Info("stop")
+                // c.logger.Info("stop")
                 return
 
             case id := <-c.remove:
                 timer.Stop()
                 now = c.now()
                 c.removeEntry(id)
-                c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "removed", "entry", id)
+                // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "removed", "entry", id)
             }
 
             break

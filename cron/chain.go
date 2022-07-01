@@ -2,11 +2,9 @@ package cron
 
 import (
     "fmt"
+    "github.com/camry/dove/log"
     "runtime"
     "sync"
-    "time"
-
-    "github.com/camry/dove/log"
 )
 
 // JobWrapper 用一些行为装饰指定的 Job。
@@ -62,12 +60,12 @@ func DelayIfStillRunning(logger *log.Helper) JobWrapper {
     return func(j Job) Job {
         var mu sync.Mutex
         return FuncJob(func() {
-            start := time.Now()
+            // start := time.Now()
             mu.Lock()
             defer mu.Unlock()
-            if dur := time.Since(start); dur > time.Minute {
-                logger.Infow(log.DefaultMessageKey, "Cron", "action", "delay", "duration", dur)
-            }
+            // if dur := time.Since(start); dur > time.Minute {
+            //     logger.Infow(log.DefaultMessageKey, "Cron", "action", "delay", "duration", dur)
+            // }
             j.Run()
         })
     }
@@ -84,7 +82,7 @@ func SkipIfStillRunning(logger *log.Helper) JobWrapper {
                 defer func() { ch <- v }()
                 j.Run()
             default:
-                logger.Info("skip")
+                // logger.Info("skip")
             }
         })
     }
