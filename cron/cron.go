@@ -137,9 +137,9 @@ func (c *Cron) AddFunc(spec string, cmd func()) (EntryID, error) {
     return c.AddJob(spec, FuncJob(cmd))
 }
 
-// AddJob adds a Job to the Cron to be run on the given schedule.
-// The spec is parsed using the time zone of this Cron instance as the default.
-// An opaque ID is returned that can be used to later remove it.
+// AddJob 添加任务到 Cron 以按给定的时间表运行。
+// 使用此 Cron 实例的时区作为默认值来解析规范。
+// 返回一个 ID，可用于稍后将其删除。
 func (c *Cron) AddJob(spec string, cmd Job) (EntryID, error) {
     schedule, err := c.parser.Parse(spec)
     if err != nil {
