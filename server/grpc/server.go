@@ -21,11 +21,6 @@ func Logger(logger log.Logger) ServerOption {
     return func(s *Server) { s.log = log.NewHelper(logger) }
 }
 
-// Network 配置网络协议。
-func Network(network string) ServerOption {
-    return func(s *Server) { s.network = network }
-}
-
 // Address 配置服务监听地址。
 func Address(address string) ServerOption {
     return func(s *Server) { s.address = address }
