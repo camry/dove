@@ -58,8 +58,8 @@ func (s *Server) Start(ctx context.Context) error {
         return err
     }
     s.conn = NewConnByNetConn(conn)
-    s.handler(s.conn)
     s.log.Infof("[UDP] server listening on: %s", s.conn.LocalAddr().String())
+    s.handler(s.conn)
     return nil
 }
 
