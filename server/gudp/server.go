@@ -30,7 +30,7 @@ type Server struct {
     network string      // UDP 服务器网络协议。
     address string      // UDP 服务器监听地址
     handler func(*Conn) // UDP 连接的处理程序。
-    log     *log.Helper
+    log     *log.Helper // 日志助手。
 }
 
 // NewServer 新建 UDP 服务器。
