@@ -2,6 +2,7 @@ package dove
 
 import (
     "github.com/camry/dove/server/gcron"
+    "github.com/camry/dove/server/gtcp"
     "github.com/camry/dove/server/gudp"
     "reflect"
     "testing"
@@ -16,10 +17,11 @@ func TestNew(t *testing.T) {
     gs := grpc.NewServer()
     gc := gcron.NewServer()
     udp := gudp.NewServer()
+    tcp := gtcp.NewServer()
     app := New(
         Name("dove"),
         Version(Release),
-        Server(hs, gs, gc, udp),
+        Server(hs, gs, gc, udp, tcp),
     )
     time.AfterFunc(time.Second, func() {
         _ = app.Stop()

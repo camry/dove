@@ -86,6 +86,7 @@ func (s *Server) Start(ctx context.Context) (err error) {
             return err
         }
     }
+    s.log.Infof("[TCP] server listening on: %s", s.listen.Addr().String())
     for {
         var conn net.Conn
         if conn, err = s.listen.Accept(); err != nil {
