@@ -2,9 +2,10 @@ package cron
 
 import (
     "fmt"
-    "github.com/camry/dove/log"
     "runtime"
     "sync"
+
+    "github.com/camry/g/glog"
 )
 
 // JobWrapper 用一些行为装饰指定的 Job。
@@ -35,7 +36,7 @@ func (c Chain) Then(j Job) Job {
 }
 
 // Recover 使用日志记录器，记录包装任务中的 panic。
-func Recover(logger *log.Helper) JobWrapper {
+func Recover(logger *glog.Helper) JobWrapper {
     return func(j Job) Job {
         return FuncJob(func() {
             defer func() {
@@ -56,7 +57,7 @@ func Recover(logger *log.Helper) JobWrapper {
 }
 
 // DelayIfStillRunning 序列化作业，延迟后续运行，直到前一个完成。延迟超过一分钟后运行的作业会在信息中记录延迟。
-func DelayIfStillRunning(logger *log.Helper) JobWrapper {
+func DelayIfStillRunning(logger *glog.Helper) JobWrapper {
     return func(j Job) Job {
         var mu sync.Mutex
         return FuncJob(func() {
@@ -64,7 +65,7 @@ func DelayIfStillRunning(logger *log.Helper) JobWrapper {
             mu.Lock()
             defer mu.Unlock()
             // if dur := time.Since(start); dur > time.Minute {
-            //     logger.Infow(log.DefaultMessageKey, "Cron", "action", "delay", "duration", dur)
+            //     logger.Infow(glog.DefaultMessageKey, "Cron", "action", "delay", "duration", dur)
             // }
             j.Run()
         })
@@ -72,7 +73,7 @@ func DelayIfStillRunning(logger *log.Helper) JobWrapper {
 }
 
 // SkipIfStillRunning 如果先前的调用仍在运行，则跳过对 Job 的调用。它记录跳转到信息级别的给定记录器。
-func SkipIfStillRunning(logger *log.Helper) JobWrapper {
+func SkipIfStillRunning(logger *glog.Helper) JobWrapper {
     return func(j Job) Job {
         var ch = make(chan struct{}, 1)
         ch <- struct{}{}

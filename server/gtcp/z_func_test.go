@@ -1,9 +1,10 @@
 package gtcp_test
 
 import (
-    "github.com/camry/dove/server/gtcp"
     "reflect"
     "testing"
+
+    "github.com/camry/dove/server/gtcp"
 )
 
 func TestGetFreePort(t *testing.T) {

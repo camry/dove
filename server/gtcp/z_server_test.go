@@ -3,10 +3,11 @@ package gtcp_test
 import (
     "context"
     "fmt"
-    "github.com/camry/dove/server/gtcp"
     "reflect"
     "testing"
     "time"
+
+    "github.com/camry/dove/server/gtcp"
 )
 
 var (

@@ -4,7 +4,7 @@ import (
     "context"
 
     "github.com/camry/dove/cron"
-    "github.com/camry/dove/log"
+    "github.com/camry/g/glog"
 )
 
 // ServerOption 定义一个 Cron 服务选项类型。
@@ -12,7 +12,7 @@ type ServerOption func(s *Server)
 
 type Server struct {
     *cron.Cron
-    log      *log.Helper
+    log      *glog.Helper
     cronOpts []cron.Option
 }
 
@@ -24,7 +24,7 @@ func Options(cronOpts ...cron.Option) ServerOption {
 // NewServer 新建 Cron 服务器。
 func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
-        log: log.NewHelper(log.GetLogger()),
+        log: glog.NewHelper(glog.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)

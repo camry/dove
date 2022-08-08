@@ -1,15 +1,15 @@
 package dove
 
 import (
-    "github.com/camry/dove/server/gcron"
-    "github.com/camry/dove/server/gtcp"
-    "github.com/camry/dove/server/gudp"
     "reflect"
     "testing"
     "time"
 
+    "github.com/camry/dove/server/gcron"
     "github.com/camry/dove/server/ghttp"
     "github.com/camry/dove/server/grpc"
+    "github.com/camry/dove/server/gtcp"
+    "github.com/camry/dove/server/gudp"
 )
 
 func TestNew(t *testing.T) {

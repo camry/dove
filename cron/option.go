@@ -3,7 +3,7 @@ package cron
 import (
     "time"
 
-    "github.com/camry/dove/log"
+    "github.com/camry/g/glog"
 )
 
 // Option 表示对 Cron 的默认行为的修改。
@@ -39,7 +39,7 @@ func WithChain(wrappers ...JobWrapper) Option {
 }
 
 // WithLogger 使用提供的日志记录器。
-func WithLogger(logger *log.Helper) Option {
+func WithLogger(logger *glog.Helper) Option {
     return func(c *Cron) {
         c.logger = logger
     }

@@ -2,16 +2,17 @@ package gudp
 
 import (
     "context"
-    "github.com/camry/dove/log"
     "net"
+
+    "github.com/camry/g/glog"
 )
 
 // ServerOption 定义一个 UDP 服务选项类型。
 type ServerOption func(s *Server)
 
 // Logger 配置日志记录器。
-func Logger(logger log.Logger) ServerOption {
-    return func(s *Server) { s.log = log.NewHelper(logger) }
+func Logger(logger glog.Logger) ServerOption {
+    return func(s *Server) { s.log = glog.NewHelper(logger) }
 }
 
 // Address 配置服务监听地址。
@@ -26,11 +27,11 @@ func Handler(handler func(*Conn)) ServerOption {
 
 // Server 定义 UDP 服务器。
 type Server struct {
-    conn    *Conn       // UDP 服务器连接对象
-    network string      // UDP 服务器网络协议。
-    address string      // UDP 服务器监听地址
-    handler func(*Conn) // UDP 连接的处理程序。
-    log     *log.Helper // 日志助手。
+    conn    *Conn        // UDP 服务器连接对象
+    network string       // UDP 服务器网络协议。
+    address string       // UDP 服务器监听地址
+    handler func(*Conn)  // UDP 连接的处理程序。
+    log     *glog.Helper // 日志助手。
 }
 
 // NewServer 新建 UDP 服务器。
@@ -39,7 +40,7 @@ func NewServer(opts ...ServerOption) *Server {
         network: "udp",
         address: ":0",
         handler: func(conn *Conn) {},
-        log:     log.NewHelper(log.GetLogger()),
+        log:     glog.NewHelper(glog.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)

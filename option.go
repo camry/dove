@@ -5,8 +5,8 @@ import (
     "os"
     "time"
 
-    "github.com/camry/dove/log"
     "github.com/camry/dove/server"
+    "github.com/camry/g/glog"
 )
 
 // Option 定义一个应用程序选项类型。
@@ -21,7 +21,7 @@ type option struct {
     ctx     context.Context
     signals []os.Signal
 
-    logger      *log.Helper
+    logger      *glog.Helper
     stopTimeout time.Duration
     servers     []server.Server
 }
@@ -52,8 +52,8 @@ func Signals(signals ...os.Signal) Option {
 }
 
 // Logger 配置日志记录器。
-func Logger(logger log.Logger) Option {
-    return func(o *option) { o.logger = log.NewHelper(logger) }
+func Logger(logger glog.Logger) Option {
+    return func(o *option) { o.logger = glog.NewHelper(logger) }
 }
 
 // StopTimeout 配置应用停止超时时间（单位：秒）。

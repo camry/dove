@@ -3,12 +3,13 @@ package gudp_test
 import (
     "context"
     "fmt"
-    "github.com/camry/dove/log"
-    "github.com/camry/dove/server/gudp"
     "reflect"
     "strconv"
     "testing"
     "time"
+
+    "github.com/camry/dove/server/gudp"
+    "github.com/camry/g/glog"
 )
 
 var (
@@ -59,7 +60,7 @@ func TestNewServer(t *testing.T) {
     )
     p, _ := gudp.GetFreePort()
     s := gudp.NewServer(gudp.Address(fmt.Sprintf("127.0.0.1:%d", p)), gudp.Handler(func(conn *gudp.Conn) {
-        logger := log.NewHelper(log.GetLogger())
+        logger := glog.NewHelper(glog.GetLogger())
         defer conn.Close()
         for {
             data, err := conn.Receive(-1)

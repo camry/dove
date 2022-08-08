@@ -2,10 +2,11 @@ package cron
 
 import (
     "context"
-    "github.com/camry/dove/log"
     "strings"
     "testing"
     "time"
+
+    "github.com/camry/g/glog"
 )
 
 func TestWithLocation(t *testing.T) {
@@ -25,7 +26,7 @@ func TestWithParser(t *testing.T) {
 
 func TestWithVerboseLogger(t *testing.T) {
     var buf syncWriter
-    logger := log.NewHelper(log.NewStdLogger(&buf))
+    logger := glog.NewHelper(glog.NewStdLogger(&buf))
     c := New(WithLogger(logger))
     if c.logger != logger {
         t.Error("expected provided logger")

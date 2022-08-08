@@ -9,7 +9,7 @@ import (
     "syscall"
     "time"
 
-    "github.com/camry/dove/log"
+    "github.com/camry/g/glog"
     "github.com/google/uuid"
     "golang.org/x/sync/errgroup"
 )
@@ -33,7 +33,7 @@ func New(opts ...Option) *App {
     o := &option{
         ctx:         context.Background(),
         signals:     []os.Signal{syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGTERM},
-        logger:      log.NewHelper(log.GetLogger()),
+        logger:      glog.NewHelper(glog.GetLogger()),
         stopTimeout: 10 * time.Second,
     }
     if id, err := uuid.NewUUID(); err == nil {

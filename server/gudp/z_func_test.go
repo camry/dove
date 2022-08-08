@@ -1,9 +1,10 @@
 package gudp_test
 
 import (
-    "github.com/camry/dove/server/gudp"
     "reflect"
     "testing"
+
+    "github.com/camry/dove/server/gudp"
 )
 
 func TestGetFreePort(t *testing.T) {

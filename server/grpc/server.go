@@ -6,7 +6,7 @@ import (
     "net"
     "time"
 
-    "github.com/camry/dove/log"
+    "github.com/camry/g/glog"
     "google.golang.org/grpc"
     "google.golang.org/grpc/credentials"
     "google.golang.org/grpc/health"
@@ -17,8 +17,8 @@ import (
 type ServerOption func(s *Server)
 
 // Logger 配置日志记录器。
-func Logger(logger log.Logger) ServerOption {
-    return func(s *Server) { s.log = log.NewHelper(logger) }
+func Logger(logger glog.Logger) ServerOption {
+    return func(s *Server) { s.log = glog.NewHelper(logger) }
 }
 
 // Address 配置服务监听地址。
@@ -54,7 +54,7 @@ func Options(grpcOpts ...grpc.ServerOption) ServerOption {
 type Server struct {
     *grpc.Server
     baseCtx            context.Context
-    log                *log.Helper
+    log                *glog.Helper
     err                error
     network            string
     address            string
@@ -75,7 +75,7 @@ func NewServer(opts ...ServerOption) *Server {
         address: ":0",
         timeout: 1 * time.Second,
         health:  health.NewServer(),
-        log:     log.NewHelper(log.GetLogger()),
+        log:     glog.NewHelper(glog.GetLogger()),
     }
     for _, o := range opts {
         o(srv)

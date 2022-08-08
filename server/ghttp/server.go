@@ -7,7 +7,7 @@ import (
     "net"
     "net/http"
 
-    "github.com/camry/dove/log"
+    "github.com/camry/g/glog"
 )
 
 // ServerOption 定义一个 HTTP 服务选项类型。
@@ -16,7 +16,7 @@ type ServerOption func(s *Server)
 // Server 定义 HTTP 服务包装器。
 type Server struct {
     *http.Server
-    log     *log.Helper
+    log     *glog.Helper
     err     error
     network string
     address string
@@ -26,8 +26,8 @@ type Server struct {
 }
 
 // Logger 配置日志记录器。
-func Logger(logger log.Logger) ServerOption {
-    return func(s *Server) { s.log = log.NewHelper(logger) }
+func Logger(logger glog.Logger) ServerOption {
+    return func(s *Server) { s.log = glog.NewHelper(logger) }
 }
 
 // Address 配置服务监听地址。
@@ -50,7 +50,7 @@ func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
         network: "tcp",
         address: ":0",
-        log:     log.NewHelper(log.GetLogger()),
+        log:     glog.NewHelper(glog.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)

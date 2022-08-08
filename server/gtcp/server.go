@@ -5,17 +5,18 @@ import (
     "crypto/tls"
     "errors"
     "fmt"
-    "github.com/camry/dove/log"
     "net"
     "sync"
+
+    "github.com/camry/g/glog"
 )
 
 // ServerOption 定义一个 TCP 服务选项类型。
 type ServerOption func(s *Server)
 
 // Logger 配置日志记录器。
-func Logger(logger log.Logger) ServerOption {
-    return func(s *Server) { s.log = log.NewHelper(logger) }
+func Logger(logger glog.Logger) ServerOption {
+    return func(s *Server) { s.log = glog.NewHelper(logger) }
 }
 
 // Address 配置服务监听地址。
@@ -41,7 +42,7 @@ type Server struct {
     address   string       // 服务器监听地址。
     handler   func(*Conn)  // 连接处理器。
     tlsConfig *tls.Config  // TLS 配置。
-    log       *log.Helper  // 日志助手
+    log       *glog.Helper // 日志助手
 }
 
 // NewServer 新建 TCP 服务器。
@@ -50,7 +51,7 @@ func NewServer(opts ...ServerOption) *Server {
         network: "tcp",
         address: ":0",
         handler: func(conn *Conn) {},
-        log:     log.NewHelper(log.GetLogger()),
+        log:     glog.NewHelper(glog.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)

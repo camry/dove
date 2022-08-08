@@ -2,10 +2,11 @@ package cron
 
 import (
     "context"
-    "github.com/camry/dove/log"
     "sort"
     "sync"
     "time"
+
+    "github.com/camry/g/glog"
 )
 
 // Cron 跟踪任意数量的条目，调用调度指定的关联函数。
@@ -18,7 +19,7 @@ type Cron struct {
     remove    chan EntryID
     snapshot  chan chan []Entry
     running   bool
-    logger    *log.Helper
+    logger    *glog.Helper
     runningMu sync.Mutex
     location  *time.Location
     parser    ScheduleParser
@@ -115,7 +116,7 @@ func New(opts ...Option) *Cron {
         remove:    make(chan EntryID),
         running:   false,
         runningMu: sync.Mutex{},
-        logger:    log.NewHelper(log.GetLogger()),
+        logger:    glog.NewHelper(glog.GetLogger()),
         location:  time.Local,
         parser:    standardParser,
     }
@@ -237,7 +238,7 @@ func (c *Cron) run() {
     now := c.now()
     for _, entry := range c.entries {
         entry.Next = entry.Schedule.Next(now)
-        // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "schedule", "now", now, "entry", entry.ID, "next", entry.Next)
+        // c.logger.Infow(glog.DefaultMessageKey, "Cron", "action", "schedule", "now", now, "entry", entry.ID, "next", entry.Next)
     }
 
     for {
@@ -256,7 +257,7 @@ func (c *Cron) run() {
             select {
             case now = <-timer.C:
                 now = now.In(c.location)
-                // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "wake", "now", now)
+                // c.logger.Infow(glog.DefaultMessageKey, "Cron", "action", "wake", "now", now)
 
                 // 运行下一次小于现在的每个条目
                 for _, e := range c.entries {
@@ -266,7 +267,7 @@ func (c *Cron) run() {
                     c.startJob(e.WrappedJob)
                     e.Prev = e.Next
                     e.Next = e.Schedule.Next(now)
-                    // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "run", "now", now, "entry", e.ID, "next", e.Next)
+                    // c.logger.Infow(glog.DefaultMessageKey, "Cron", "action", "run", "now", now, "entry", e.ID, "next", e.Next)
                 }
 
             case newEntry := <-c.add:
@@ -274,7 +275,7 @@ func (c *Cron) run() {
                 now = c.now()
                 newEntry.Next = newEntry.Schedule.Next(now)
                 c.entries = append(c.entries, newEntry)
-                // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "added", "now", now, "entry", newEntry.ID, "next", newEntry.Next)
+                // c.logger.Infow(glog.DefaultMessageKey, "Cron", "action", "added", "now", now, "entry", newEntry.ID, "next", newEntry.Next)
 
             case replyChan := <-c.snapshot:
                 replyChan <- c.entrySnapshot()
@@ -289,7 +290,7 @@ func (c *Cron) run() {
                 timer.Stop()
                 now = c.now()
                 c.removeEntry(id)
-                // c.logger.Infow(log.DefaultMessageKey, "Cron", "action", "removed", "entry", id)
+                // c.logger.Infow(glog.DefaultMessageKey, "Cron", "action", "removed", "entry", id)
             }
 
             break
