@@ -16,7 +16,12 @@ type Server struct {
     cronOpts []cron.Option
 }
 
-// Options 配置 gRPC 选项。
+// Logger 配置日志记录器。
+func Logger(logger glog.Logger) ServerOption {
+    return func(s *Server) { s.log = glog.NewHelper(logger) }
+}
+
+// Options 配置 Cron 选项。
 func Options(cronOpts ...cron.Option) ServerOption {
     return func(s *Server) { s.cronOpts = cronOpts }
 }
