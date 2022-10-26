@@ -3,7 +3,7 @@ package gcron
 import (
     "context"
 
-    "github.com/camry/dove/cron"
+    cron "github.com/camry/g/gcron"
     "github.com/camry/g/glog"
 )
 
