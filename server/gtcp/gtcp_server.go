@@ -3,6 +3,7 @@ package gtcp
 import (
     "context"
     "crypto/tls"
+    
     "github.com/camry/g/glog"
     "github.com/camry/g/gnet/gtcp"
 )
@@ -43,7 +44,9 @@ type Server struct {
 // NewServer 新建 TCP 服务器。
 func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
-        log: glog.NewHelper(glog.GetLogger()),
+        address: ":0",
+        handler: func(conn *gtcp.Conn) {},
+        log:     glog.NewHelper(glog.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)
@@ -54,7 +57,7 @@ func NewServer(opts ...ServerOption) *Server {
 
 // Start 启动 TCP 服务器。
 func (s *Server) Start(ctx context.Context) (err error) {
-    s.log.Infof("[TCP] server listening on: %s", s.Listener().Addr().String())
+    s.log.Infof("[TCP] server listening on %s", s.GetListenedAddress())
     return s.Run(ctx)
 }
 
