@@ -53,4 +53,4 @@ Dove 框架开源许可证 [MIT LICENSE](https://github.com/camry/g/blob/main/LI
 
 以下项目对 Dove 框架的设计产生了特别的影响。
 
-- [go-kratos/kratos](https://github.com/go-kratos/kratos) Kratos 一套轻量级 Go 微服务框架，包含大量微服务相关功能及工具。
+- [go-kratos/kratos](https://github.com/go-kratos/kratos) Kratos is a microservice-oriented governance framework implemented by golang.
