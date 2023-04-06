@@ -3,7 +3,7 @@ module github.com/camry/dove
 go 1.18
 
 require (
-	github.com/camry/g v1.2.5
+	github.com/camry/g v1.2.6
 	github.com/google/uuid v1.3.0
 	golang.org/x/sync v0.1.0
 	google.golang.org/grpc v1.46.0
