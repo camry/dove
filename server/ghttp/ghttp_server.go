@@ -16,18 +16,12 @@ type ServerOption func(s *Server)
 // Server 定义 HTTP 服务包装器。
 type Server struct {
     *http.Server
-    log     *glog.Helper
     err     error
     network string
     address string
     tlsConf *tls.Config
     lis     net.Listener
     handler http.Handler
-}
-
-// Logger 配置日志记录器。
-func Logger(logger glog.Logger) ServerOption {
-    return func(s *Server) { s.log = glog.NewHelper(logger) }
 }
 
 // Address 配置服务监听地址。
@@ -50,7 +44,6 @@ func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
         network: "tcp",
         address: ":0",
-        log:     glog.NewHelper(glog.GetLogger()),
     }
     for _, opt := range opts {
         opt(srv)
@@ -71,7 +64,7 @@ func (s *Server) Start(ctx context.Context) error {
     s.BaseContext = func(net.Listener) context.Context {
         return ctx
     }
-    s.log.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
+    glog.Infof("[HTTP] server listening on: %s", s.lis.Addr().String())
     var err error
     if s.tlsConf != nil {
         err = s.ServeTLS(s.lis, "", "")
@@ -86,7 +79,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Stop 停止 HTTP 服务。
 func (s *Server) Stop(ctx context.Context) error {
-    s.log.Info("[HTTP] server stopping")
+    glog.Info("[HTTP] server stopping")
     return s.Shutdown(ctx)
 }
 
