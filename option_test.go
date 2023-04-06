@@ -2,6 +2,8 @@ package dove
 
 import (
     "context"
+    "github.com/camry/g/glog"
+    "log"
     "os"
     "reflect"
     "testing"
@@ -45,6 +47,15 @@ func TestContext(t *testing.T) {
     }
 }
 
+func TestLogger(t *testing.T) {
+    o := &option{}
+    v := glog.NewStdLogger(log.Writer())
+    Logger(v)(o)
+    if !reflect.DeepEqual(v, o.logger) {
+        t.Fatalf("o.logger:%v is not equal to xlog.NewHelper(v):%v", o.logger, glog.NewHelper(v))
+    }
+}
+
 type mockSignal struct{}
 
 func (m *mockSignal) String() string { return "sig" }
@@ -55,8 +66,8 @@ func TestSignal(t *testing.T) {
     v := []os.Signal{
         &mockSignal{}, &mockSignal{},
     }
-    Signals(v...)(o)
-    if !reflect.DeepEqual(v, o.signals) {
+    Signal(v...)(o)
+    if !reflect.DeepEqual(v, o.sigs) {
         t.Fatal("o.sigs is not equal to v")
     }
 }
@@ -68,4 +79,40 @@ func TestStopTimeout(t *testing.T) {
     if !reflect.DeepEqual(v, o.stopTimeout) {
         t.Fatal("o.stopTimeout is not equal to v")
     }
+}
+
+func TestBeforeStart(t *testing.T) {
+    o := &option{}
+    v := func(_ context.Context) error {
+        t.Log("BeforeStart...")
+        return nil
+    }
+    BeforeStart(v)(o)
+}
+
+func TestBeforeStop(t *testing.T) {
+    o := &option{}
+    v := func(_ context.Context) error {
+        t.Log("BeforeStop...")
+        return nil
+    }
+    BeforeStop(v)(o)
+}
+
+func TestAfterStart(t *testing.T) {
+    o := &option{}
+    v := func(_ context.Context) error {
+        t.Log("AfterStart...")
+        return nil
+    }
+    AfterStart(v)(o)
+}
+
+func TestAfterStop(t *testing.T) {
+    o := &option{}
+    v := func(_ context.Context) error {
+        t.Log("AfterStop...")
+        return nil
+    }
+    AfterStop(v)(o)
 }

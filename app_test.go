@@ -1,11 +1,11 @@
-package dove_test
+package dove
 
 import (
+    "context"
     "reflect"
     "testing"
     "time"
 
-    "github.com/camry/dove"
     "github.com/camry/dove/server/gcron"
     "github.com/camry/dove/server/ghttp"
     "github.com/camry/dove/server/grpc"
@@ -23,10 +23,26 @@ func TestNew(t *testing.T) {
     }))
     udp := gudp.NewServer(gudp.Handler(func(conn *ggudp.Conn) {
     }))
-    app := dove.New(
-        dove.Name("dove"),
-        dove.Version(dove.Release),
-        dove.Server(hs, gs, gc, tcp, udp),
+    app := New(
+        Name("dove"),
+        Version(Release),
+        Server(hs, gs, gc, tcp, udp),
+        BeforeStart(func(_ context.Context) error {
+            t.Log("BeforeStart...")
+            return nil
+        }),
+        BeforeStop(func(_ context.Context) error {
+            t.Log("BeforeStop...")
+            return nil
+        }),
+        AfterStart(func(_ context.Context) error {
+            t.Log("AfterStart...")
+            return nil
+        }),
+        AfterStop(func(_ context.Context) error {
+            t.Log("AfterStop...")
+            return nil
+        }),
     )
     time.AfterFunc(time.Second, func() {
         _ = app.Stop()
@@ -38,7 +54,7 @@ func TestNew(t *testing.T) {
 
 func TestApp_ID(t *testing.T) {
     v := "123"
-    o := dove.New(dove.ID(v))
+    o := New(ID(v))
     if !reflect.DeepEqual(v, o.ID()) {
         t.Fatalf("o.ID():%s is not equal to v:%s", o.ID(), v)
     }
@@ -46,7 +62,7 @@ func TestApp_ID(t *testing.T) {
 
 func TestApp_Name(t *testing.T) {
     v := "123"
-    o := dove.New(dove.Name(v))
+    o := New(Name(v))
     if !reflect.DeepEqual(v, o.Name()) {
         t.Fatalf("o.Name():%s is not equal to v:%s", o.Name(), v)
     }
@@ -54,7 +70,7 @@ func TestApp_Name(t *testing.T) {
 
 func TestApp_Version(t *testing.T) {
     v := "123"
-    o := dove.New(dove.Version(v))
+    o := New(Version(v))
     if !reflect.DeepEqual(v, o.Version()) {
         t.Fatalf("o.Version():%s is not equal to v:%s", o.Version(), v)
     }

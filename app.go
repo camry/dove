@@ -23,30 +23,32 @@ type AppInfo interface {
 
 // App 应用程序组件生命周期管理器。
 type App struct {
-    opt    *option
+    opt    option
     ctx    context.Context
     cancel func()
 }
 
 // New 创建应用生命周期管理器。
 func New(opts ...Option) *App {
-    o := &option{
+    o := option{
         ctx:         context.Background(),
-        signals:     []os.Signal{syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGTERM},
-        logger:      glog.NewHelper(glog.GetLogger()),
+        sigs:        []os.Signal{syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT},
         stopTimeout: 10 * time.Second,
     }
     if id, err := uuid.NewUUID(); err == nil {
         o.id = id.String()
     }
     for _, opt := range opts {
-        opt(o)
+        opt(&o)
+    }
+    if o.logger != nil {
+        glog.SetLogger(o.logger)
     }
     ctx, cancel := context.WithCancel(o.ctx)
     return &App{
-        opt:    o,
         ctx:    ctx,
         cancel: cancel,
+        opt:    o,
     }
 }
 
@@ -60,51 +62,66 @@ func (a *App) Name() string { return a.opt.name }
 func (a *App) Version() string { return a.opt.version }
 
 // Run 执行应用程序生命周期中注册的所有服务。
-func (a *App) Run() error {
-    eg, ctx := errgroup.WithContext(NewContext(a.ctx, a))
+func (a *App) Run() (err error) {
+    sctx := NewContext(a.ctx, a)
+    eg, ctx := errgroup.WithContext(sctx)
     wg := sync.WaitGroup{}
-    c := make(chan os.Signal, 1)
-    signal.Notify(c, a.opt.signals...)
+
+    for _, fn := range a.opt.beforeStart {
+        if err = fn(sctx); err != nil {
+            return err
+        }
+    }
 
     // 启动注册的服务器。
     for _, srv := range a.opt.servers {
         srv := srv
         eg.Go(func() error {
             <-ctx.Done() // 等待停止信号
-            stopCtx, cancel := context.WithTimeout(NewContext(a.opt.ctx, a), a.opt.stopTimeout)
+            stopCtx, cancel := context.WithTimeout(sctx, a.opt.stopTimeout)
             defer cancel()
             return srv.Stop(stopCtx)
         })
         wg.Add(1)
         eg.Go(func() error {
             wg.Done()
-            return srv.Start(NewContext(a.opt.ctx, a))
+            return srv.Start(sctx)
         })
     }
     wg.Wait()
 
+    for _, fn := range a.opt.afterStart {
+        if err = fn(sctx); err != nil {
+            return err
+        }
+    }
+
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, a.opt.sigs...)
     // 停止应用程序。
     eg.Go(func() error {
-        for {
-            select {
-            case <-ctx.Done():
-                return ctx.Err()
-            case <-c:
-                if err := a.Stop(); err != nil {
-                    a.opt.logger.Errorf("failed to stop app: %v", err)
-                    return err
-                }
-            }
+        select {
+        case <-ctx.Done():
+            return ctx.Err()
+        case <-c:
+            return a.Stop()
         }
     })
-    if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+    if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
         return err
+    }
+    for _, fn := range a.opt.afterStop {
+        err = fn(sctx)
     }
     return nil
 }
 
 // Stop 优雅的停止应用程序。
-func (a *App) Stop() error {
+func (a *App) Stop() (err error) {
+    sctx := NewContext(a.ctx, a)
+    for _, fn := range a.opt.beforeStop {
+        err = fn(sctx)
+    }
     if a.cancel != nil {
         a.cancel()
     }
