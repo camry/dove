@@ -3,7 +3,7 @@ package gtcp
 import (
     "context"
     "crypto/tls"
-    
+
     "github.com/camry/g/glog"
     "github.com/camry/g/gnet/gtcp"
 )
@@ -51,7 +51,11 @@ func NewServer(opts ...ServerOption) *Server {
     for _, opt := range opts {
         opt(srv)
     }
-    srv.Server = gtcp.NewServer(srv.address, srv.handler, srv.tlsConfig)
+    if srv.tlsConfig != nil {
+        srv.Server = gtcp.NewServerTLS(srv.address, srv.tlsConfig, srv.handler)
+    } else {
+        srv.Server = gtcp.NewServer(srv.address, srv.handler)
+    }
     return srv
 }
 
