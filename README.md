@@ -15,6 +15,7 @@ package main
 
 import (
     "log"
+    "context"
 
     "github.com/camry/dove"
     "github.com/camry/dove/server/gcron"
@@ -38,6 +39,22 @@ func main() {
         dove.Name("dove"),
         dove.Version(dove.Release),
         dove.Server(hs, gs, gc, tcp, udp),
+        dove.BeforeStart(func(_ context.Context) error {
+            log.Println("BeforeStart...")
+            return nil
+        }),
+        dove.BeforeStop(func(_ context.Context) error {
+            log.Println("BeforeStop...")
+            return nil
+        }),
+        dove.AfterStart(func(_ context.Context) error {
+            log.Println("AfterStart...")
+            return nil
+        }),
+        dove.AfterStop(func(_ context.Context) error {
+            log.Println("AfterStop...")
+            return nil
+        }),
     )
     if err := app.Run(); err != nil {
         log.Fatal(err)
