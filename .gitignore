@@ -1,4 +1,6 @@
-# Reference https://github.com/github/gitignore/blob/master/Go.gitignore
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -13,22 +15,11 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-vendor/
+# vendor/
 
-# Compiled Object files, Static and Dynamic libs (Shared Objects)
-*.o
-*.a
-*.so
-
-# OS General
-Thumbs.db
-.DS_Store
-
-# project
-*.cert
-*.key
-*.log
-bin/
+# Go workspace file
+go.work
+go.work.sum
 
 # Develop tools
 .vscode/
