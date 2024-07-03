@@ -25,7 +25,7 @@ type AppInfo interface {
 type App struct {
     opt    option
     ctx    context.Context
-    cancel func()
+    cancel context.CancelFunc
 }
 
 // New 创建应用生命周期管理器。
@@ -78,14 +78,14 @@ func (a *App) Run() (err error) {
         srv := srv
         eg.Go(func() error {
             <-ctx.Done() // 等待停止信号
-            stopCtx, cancel := context.WithTimeout(sctx, a.opt.stopTimeout)
+            stopCtx, cancel := context.WithTimeout(NewContext(a.opt.ctx, a), a.opt.stopTimeout)
             defer cancel()
             return srv.Stop(stopCtx)
         })
         wg.Add(1)
         eg.Go(func() error {
             wg.Done()
-            return srv.Start(sctx)
+            return srv.Start(NewContext(a.opt.ctx, a))
         })
     }
     wg.Wait()
@@ -102,7 +102,7 @@ func (a *App) Run() (err error) {
     eg.Go(func() error {
         select {
         case <-ctx.Done():
-            return ctx.Err()
+            return nil
         case <-c:
             return a.Stop()
         }
@@ -110,10 +110,11 @@ func (a *App) Run() (err error) {
     if err = eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
         return err
     }
+    err = nil
     for _, fn := range a.opt.afterStop {
         err = fn(sctx)
     }
-    return nil
+    return err
 }
 
 // Stop 优雅的停止应用程序。
@@ -125,7 +126,7 @@ func (a *App) Stop() (err error) {
     if a.cancel != nil {
         a.cancel()
     }
-    return nil
+    return err
 }
 
 type appKey struct{}
