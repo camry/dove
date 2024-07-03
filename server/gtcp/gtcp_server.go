@@ -3,6 +3,8 @@ package gtcp
 import (
     "context"
     "crypto/tls"
+    "errors"
+    "net"
 
     "github.com/camry/g/glog"
     "github.com/camry/g/gnet/gtcp"
@@ -55,7 +57,11 @@ func NewServer(opts ...ServerOption) *Server {
 // Start 启动 TCP 服务器。
 func (s *Server) Start(ctx context.Context) (err error) {
     glog.Infof("[TCP] server listening on %s", s.GetListenedAddress())
-    return s.Run(ctx)
+    err = s.Run(ctx)
+    if !errors.Is(err, net.ErrClosed) {
+        return err
+    }
+    return nil
 }
 
 // Stop 停止 TCP 服务器。

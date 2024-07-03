@@ -6,13 +6,14 @@ import (
     "testing"
     "time"
 
+    ggtcp "github.com/camry/g/gnet/gtcp"
+    ggudp "github.com/camry/g/gnet/gudp"
+
     "github.com/camry/dove/server/gcron"
     "github.com/camry/dove/server/ghttp"
     "github.com/camry/dove/server/grpc"
     "github.com/camry/dove/server/gtcp"
     "github.com/camry/dove/server/gudp"
-    ggtcp "github.com/camry/g/gnet/gtcp"
-    ggudp "github.com/camry/g/gnet/gudp"
 )
 
 func TestNew(t *testing.T) {
