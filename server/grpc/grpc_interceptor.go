@@ -3,8 +3,9 @@ package grpc
 import (
     "context"
 
-    ic "github.com/camry/dove/internal/context"
     "google.golang.org/grpc"
+
+    ic "github.com/camry/dove/internal/context"
 )
 
 // unaryServerInterceptor 默认 gRPC 一元拦截器。
