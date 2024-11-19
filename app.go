@@ -63,35 +63,35 @@ func (a *App) Version() string { return a.opt.version }
 
 // Run 执行应用程序生命周期中注册的所有服务。
 func (a *App) Run() (err error) {
-    sctx := NewContext(a.ctx, a)
-    eg, ctx := errgroup.WithContext(sctx)
+    sCtx := NewContext(a.ctx, a)
+    eg, ctx := errgroup.WithContext(sCtx)
     wg := sync.WaitGroup{}
 
     for _, fn := range a.opt.beforeStart {
-        if err = fn(sctx); err != nil {
+        if err = fn(sCtx); err != nil {
             return err
         }
     }
 
     // 启动注册的服务器。
     for _, srv := range a.opt.servers {
-        srv := srv
+        server := srv
         eg.Go(func() error {
             <-ctx.Done() // 等待停止信号
             stopCtx, cancel := context.WithTimeout(NewContext(a.opt.ctx, a), a.opt.stopTimeout)
             defer cancel()
-            return srv.Stop(stopCtx)
+            return server.Stop(stopCtx)
         })
         wg.Add(1)
         eg.Go(func() error {
             wg.Done()
-            return srv.Start(NewContext(a.opt.ctx, a))
+            return server.Start(NewContext(a.opt.ctx, a))
         })
     }
     wg.Wait()
 
     for _, fn := range a.opt.afterStart {
-        if err = fn(sctx); err != nil {
+        if err = fn(sCtx); err != nil {
             return err
         }
     }
@@ -112,16 +112,16 @@ func (a *App) Run() (err error) {
     }
     err = nil
     for _, fn := range a.opt.afterStop {
-        err = fn(sctx)
+        err = fn(sCtx)
     }
     return err
 }
 
 // Stop 优雅的停止应用程序。
 func (a *App) Stop() (err error) {
-    sctx := NewContext(a.ctx, a)
+    sCtx := NewContext(a.ctx, a)
     for _, fn := range a.opt.beforeStop {
-        err = fn(sctx)
+        err = fn(sCtx)
     }
     if a.cancel != nil {
         a.cancel()
