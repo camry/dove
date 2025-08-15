@@ -3,8 +3,8 @@ package gudp
 import (
     "context"
 
-    "github.com/camry/g/glog"
-    "github.com/camry/g/gnet/gudp"
+    "github.com/camry/g/v2/glog"
+    "github.com/camry/g/v2/gnet/gudp"
 )
 
 // ServerOption 定义一个 UDP 服务选项类型。
@@ -16,7 +16,7 @@ func Address(address string) ServerOption {
 }
 
 // Handler 配置处理器。
-func Handler(handler func(*gudp.Conn)) ServerOption {
+func Handler(handler func(conn *gudp.ServerConn)) ServerOption {
     return func(s *Server) { s.handler = handler }
 }
 
@@ -24,15 +24,15 @@ func Handler(handler func(*gudp.Conn)) ServerOption {
 type Server struct {
     *gudp.Server
 
-    address string           // UDP 服务器监听地址。
-    handler func(*gudp.Conn) // UDP 连接的处理程序。
+    address string                      // UDP 服务器监听地址。
+    handler func(conn *gudp.ServerConn) // UDP 连接的处理程序。
 }
 
 // NewServer 新建 UDP 服务器。
 func NewServer(opts ...ServerOption) *Server {
     srv := &Server{
         address: ":0",
-        handler: func(conn *gudp.Conn) {},
+        handler: func(conn *gudp.ServerConn) {},
     }
     for _, opt := range opts {
         opt(srv)

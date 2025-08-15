@@ -5,7 +5,7 @@
 ## 安装
 
 ```bash
-go get -u github.com/camry/dove
+go get -u github.com/camry/dove/v2
 ```
 
 ## 使用
@@ -14,17 +14,17 @@ go get -u github.com/camry/dove
 package main
 
 import (
-    "log"
     "context"
+    "log"
 
-    "github.com/camry/dove"
-    "github.com/camry/dove/server/gcron"
-    "github.com/camry/dove/server/ghttp"
-    "github.com/camry/dove/server/grpc"
-    "github.com/camry/dove/server/gtcp"
-    "github.com/camry/dove/server/gudp"
-    ggtcp "github.com/camry/g/gnet/gtcp"
-    ggudp "github.com/camry/g/gnet/gudp"
+    "github.com/camry/dove/v2"
+    "github.com/camry/dove/v2/server/gcron"
+    "github.com/camry/dove/v2/server/ghttp"
+    "github.com/camry/dove/v2/server/grpc"
+    "github.com/camry/dove/v2/server/gtcp"
+    "github.com/camry/dove/v2/server/gudp"
+    ggtcp "github.com/camry/g/v2/gnet/gtcp"
+    ggudp "github.com/camry/g/v2/gnet/gudp"
 )
 
 func main() {
@@ -33,7 +33,7 @@ func main() {
     gc := gcron.NewServer()
     tcp := gtcp.NewServer(gtcp.Handler(func(conn *ggtcp.Conn) {
     }))
-    udp := gudp.NewServer(gudp.Handler(func(conn *ggudp.Conn) {
+    udp := gudp.NewServer(gudp.Handler(func(conn *ggudp.ServerConn) {
     }))
     app := dove.New(
         dove.Name("dove"),
@@ -64,7 +64,7 @@ func main() {
 
 ## License
 
-Dove 框架开源许可证 [MIT LICENSE](https://github.com/camry/g/blob/main/LICENSE)
+Dove 框架开源许可证 [MIT LICENSE](https://github.com/camry/g/v2/blob/main/LICENSE)
 
 ## 致谢
 

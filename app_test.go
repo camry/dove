@@ -6,14 +6,14 @@ import (
     "testing"
     "time"
 
-    ggtcp "github.com/camry/g/gnet/gtcp"
-    ggudp "github.com/camry/g/gnet/gudp"
+    ggtcp "github.com/camry/g/v2/gnet/gtcp"
+    ggudp "github.com/camry/g/v2/gnet/gudp"
 
-    "github.com/camry/dove/server/gcron"
-    "github.com/camry/dove/server/ghttp"
-    "github.com/camry/dove/server/grpc"
-    "github.com/camry/dove/server/gtcp"
-    "github.com/camry/dove/server/gudp"
+    "github.com/camry/dove/v2/server/gcron"
+    "github.com/camry/dove/v2/server/ghttp"
+    "github.com/camry/dove/v2/server/grpc"
+    "github.com/camry/dove/v2/server/gtcp"
+    "github.com/camry/dove/v2/server/gudp"
 )
 
 func TestNew(t *testing.T) {
@@ -22,7 +22,7 @@ func TestNew(t *testing.T) {
     gc := gcron.NewServer()
     tcp := gtcp.NewServer(gtcp.Handler(func(conn *ggtcp.Conn) {
     }))
-    udp := gudp.NewServer(gudp.Handler(func(conn *ggudp.Conn) {
+    udp := gudp.NewServer(gudp.Handler(func(conn *ggudp.ServerConn) {
     }))
     app := New(
         Name("dove"),

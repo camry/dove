@@ -9,7 +9,7 @@ import (
     "syscall"
     "time"
 
-    "github.com/camry/g/glog"
+    "github.com/camry/g/v2/glog"
     "github.com/google/uuid"
     "golang.org/x/sync/errgroup"
 )

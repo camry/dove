@@ -1,9 +1,9 @@
-module github.com/camry/dove
+module github.com/camry/dove/v2
 
 go 1.24.0
 
 require (
-	github.com/camry/g v1.3.0
+	github.com/camry/g/v2 v2.0.1
 	github.com/google/uuid v1.6.0
 	golang.org/x/sync v0.16.0
 	google.golang.org/grpc v1.74.2

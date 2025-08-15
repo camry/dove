@@ -7,7 +7,7 @@ import (
     "net"
     "net/http"
 
-    "github.com/camry/g/glog"
+    "github.com/camry/g/v2/glog"
 )
 
 // ServerOption 定义一个 HTTP 服务选项类型。

@@ -6,7 +6,7 @@ import (
     "net"
     "time"
 
-    "github.com/camry/g/glog"
+    "github.com/camry/g/v2/glog"
     "google.golang.org/grpc"
     "google.golang.org/grpc/credentials"
     "google.golang.org/grpc/health"

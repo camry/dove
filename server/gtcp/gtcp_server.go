@@ -6,8 +6,8 @@ import (
     "errors"
     "net"
 
-    "github.com/camry/g/glog"
-    "github.com/camry/g/gnet/gtcp"
+    "github.com/camry/g/v2/glog"
+    "github.com/camry/g/v2/gnet/gtcp"
 )
 
 // ServerOption 定义一个 TCP 服务选项类型。

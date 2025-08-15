@@ -5,9 +5,9 @@ import (
     "os"
     "time"
 
-    "github.com/camry/g/glog"
+    "github.com/camry/g/v2/glog"
 
-    "github.com/camry/dove/server"
+    "github.com/camry/dove/v2/server"
 )
 
 // Option 定义一个应用程序选项类型。
