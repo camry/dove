@@ -64,7 +64,7 @@ func main() {
 
 ## License
 
-Dove 框架开源许可证 [MIT LICENSE](https://github.com/camry/g/v2/blob/main/LICENSE)
+Dove 框架开源许可证 [MIT LICENSE](https://github.com/camry/dove/blob/main/LICENSE)
 
 ## 致谢
 
