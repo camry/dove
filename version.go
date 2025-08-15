@@ -1,3 +1,3 @@
 package dove
 
-const Release = "v1.3.1"
+const Release = "v2.0.0"
