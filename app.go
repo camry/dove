@@ -73,19 +73,24 @@ func (a *App) Run() (err error) {
         }
     }
 
+    oCtx := NewContext(a.opt.ctx, a)
     // 启动注册的服务器。
     for _, srv := range a.opt.servers {
         server := srv
         eg.Go(func() error {
             <-ctx.Done() // 等待停止信号
-            stopCtx, cancel := context.WithTimeout(NewContext(a.opt.ctx, a), a.opt.stopTimeout)
-            defer cancel()
+            stopCtx := oCtx
+            if a.opt.stopTimeout > 0 {
+                var cancel context.CancelFunc
+                stopCtx, cancel = context.WithTimeout(stopCtx, a.opt.stopTimeout)
+                defer cancel()
+            }
             return server.Stop(stopCtx)
         })
         wg.Add(1)
         eg.Go(func() error {
             wg.Done()
-            return server.Start(NewContext(a.opt.ctx, a))
+            return server.Start(oCtx)
         })
     }
     wg.Wait()

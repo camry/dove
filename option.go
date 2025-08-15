@@ -73,9 +73,9 @@ func Server(srv ...server.Server) Option {
     return func(o *option) { o.servers = srv }
 }
 
-/************************************/
-/******* Before and After ********/
-/************************************/
+/**********************************/
+/******** Before and After ********/
+/**********************************/
 
 // BeforeStart 应用启动前执行此 funcs。
 func BeforeStart(fn func(context.Context) error) Option {
