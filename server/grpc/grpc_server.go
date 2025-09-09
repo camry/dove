@@ -12,7 +12,11 @@ import (
     "google.golang.org/grpc/health"
     "google.golang.org/grpc/health/grpc_health_v1"
     "google.golang.org/grpc/reflection"
+
+    "github.com/camry/dove/v2/server"
 )
+
+var _ server.Server = (*Server)(nil)
 
 type ServerOption func(s *Server)
 

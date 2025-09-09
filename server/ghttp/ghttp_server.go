@@ -8,7 +8,11 @@ import (
     "net/http"
 
     "github.com/camry/g/v2/glog"
+
+    "github.com/camry/dove/v2/server"
 )
+
+var _ server.Server = (*Server)(nil)
 
 // ServerOption 定义一个 HTTP 服务选项类型。
 type ServerOption func(s *Server)
